@@ -1,18 +1,26 @@
-import axios from "axios";
+import extractOrganizationName from "@/utils/functions";
+import axios, { AxiosError } from "axios";
 
-export const dynamic = "force-dynamic"; // defaults to auto
-
-const createOrganization = async (organizationName: string) => {
+const createOrganization = async (email: string) => {
   try {
+    const organizationName = await extractOrganizationName(email);
     const response = await axios.post(
       `http://localhost:3001/createOrganization`,
       {
         organization: { name: organizationName },
       }
     );
-    console.log("cheguei aqui" + response);
-  } catch (error) {
-    throw error;
+    return response.data;
+  } catch (error: unknown) {
+    if (
+      axios.isAxiosError(error) &&
+      error.response &&
+      error.response.status === 422
+    ) {
+      return { status: "OK" };
+    } else {
+      throw error;
+    }
   }
 };
 
