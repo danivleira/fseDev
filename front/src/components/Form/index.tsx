@@ -1,106 +1,171 @@
 "use client";
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
-import Textarea from "@mui/joy/Textarea";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/system";
-import { createTheme } from "@mui/material/styles";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup/dist/yup.js";
-import { useForm } from "react-hook-form";
-import { TextareaAutosize } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import { File } from "buffer";
+import { ToastContainer, toast } from "react-toastify";
+import {
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  InputLabel,
+  Radio,
+  RadioGroup,
+  Select,
+  SelectChangeEvent,
+  TextareaAutosize,
+} from "@mui/material";
+
+import {
+  CustomForm,
+  buttonStyles,
+  focusStyles,
+  textStyles,
+  textStylesAutosize,
+} from "./styles";
 
 interface FormData {
   accountName: string;
   requesterEmail: string;
   subject: string;
   detailing: string;
+  orderNumber?: string;
+  affectingAllUsers?: string;
+  transactionNumber?: string;
+  transactionStatus?: string;
+  paymentAcquirer?: string;
+  skuId?: string;
+  printOfThePage?: any;
 }
 interface FormProps {
   onSubmit: (data: FormData) => void;
 }
 
-const textStyles = {
-  color: "white",
-  backgroundColor: "#F72068",
-  borderRadius: "25px",
-  width: "25vw",
-};
-
-const buttonStyles = {
-  color: "white",
-  backgroundColor: "#F72068",
-  borderRadius: "25px",
-  width: "20vw",
-};
-
-const focusStyles = {
-  borderRadius: "25px",
-  borderColor: "blue",
-};
-
-const CustomForm = styled("form")({
-  display: "flex",
-  flexDirection: "column",
-  gap: "25px",
-});
-
-const schema = yup.object().shape({
-  accountName: yup
-    .string()
-    .required("Account name é obrigatorio")
-    .min(5, "Mínimo de 5 letras")
-    .matches(
-      /^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/,
-      "O account name deve conter apenas letras"
-    ),
-
-  requesterEmail: yup
-    .string()
-    .required("Requester email é obrigatorio")
-    .email("email não é valido"),
-
-  subject: yup.string().required("Subject é obrigatorio"),
-
-  detailing: yup.string().required("Ofereça detalhes sobre seu ticket"),
-});
-
 const Form: React.FC<FormProps> = ({ onSubmit }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: yupResolver(schema), // Aqui está o uso do yupResolver com o esquema yup
-  });
-
+  const [module, setModule] = React.useState("");
   const [formData, setFormData] = useState<FormData>({
     accountName: "",
     requesterEmail: "",
     subject: "",
     detailing: "",
+    orderNumber: "",
+    affectingAllUsers: "",
+    transactionNumber: "",
+    transactionStatus: "",
+    paymentAcquirer: "",
+    skuId: "",
+    printOfThePage: "",
   });
 
-  const [validationErrors, setValidationErrors] = useState({
-    accountName: false,
-    requesterEmail: false,
-    subject: false,
-    detailing: false,
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    // Não é necessário mais setFormData, o register do useForm faz isso automaticamente
+  const handleChange = (event: SelectChangeEvent) => {
+    setModule(event.target.value as string);
   };
 
-  const onSubmitHandler = (data: FormData) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const data: FormData = {
+      accountName: e.currentTarget.accountName.value,
+      requesterEmail: e.currentTarget.requesterEmail.value,
+      subject: e.currentTarget.subject.value,
+      detailing: e.currentTarget.detailing.value,
+      orderNumber: e.currentTarget.orderNumber?.value || "",
+      affectingAllUsers: formData.affectingAllUsers,
+      transactionNumber: e.currentTarget.transactionNumber?.value || "",
+      transactionStatus: e.currentTarget.transactionStatus?.value || "",
+      paymentAcquirer: e.currentTarget.paymentAcquirer?.value || "",
+      skuId: e.currentTarget.skuId?.value || "",
+      printOfThePage: e.currentTarget.printOfThePage?.files?.length
+        ? e.currentTarget.printOfThePage?.files[0]
+        : null,
+    };
+
+    console.log(data);
+    switch (module) {
+      case "Orders":
+        if (
+          !data.orderNumber ||
+          !data.accountName ||
+          !data.requesterEmail ||
+          !data.subject ||
+          !data.detailing
+        ) {
+          toast.error("Preencha todos os campos para Orders", {
+            autoClose: 2000,
+            hideProgressBar: true,
+          });
+          return;
+        } else {
+          data.subject = `Module: ${data.subject}, order number:${data.orderNumber}`;
+        }
+        break;
+      case "Payments":
+        if (
+          !data.transactionNumber ||
+          !data.transactionStatus ||
+          !data.paymentAcquirer ||
+          !data.accountName ||
+          !data.requesterEmail ||
+          !data.subject ||
+          !data.detailing
+        ) {
+          toast.error("Preencha todos os campos obrigatórios para Payments", {
+            autoClose: 2000,
+            hideProgressBar: true,
+          });
+          return;
+        } else {
+          data.subject = `Module: ${data.subject}, transaction number:${data.transactionNumber}, transaction status:${data.transactionNumber}, payment acquirer:${data.paymentAcquirer}`;
+        }
+        break;
+      case "Catalog":
+        if (
+          !data.skuId ||
+          !data.printOfThePage ||
+          !data.accountName ||
+          !data.requesterEmail ||
+          !data.subject ||
+          !data.detailing
+        ) {
+          toast.error("Preencha todos os campos obrigatórios para Catalog", {
+            autoClose: 2000,
+            hideProgressBar: true,
+          });
+          return;
+        } else {
+          data.subject = `Module: ${data.subject}, skuId:${data.skuId}`;
+        }
+        break;
+      case "Others":
+        if (
+          !data.detailing ||
+          !data.accountName ||
+          !data.requesterEmail ||
+          !data.subject
+        ) {
+          console.log(
+            !data.detailing ||
+              !data.accountName ||
+              !data.requesterEmail ||
+              !data.subject
+          );
+          toast.error("Preencha o campo obrigatório para Others", {
+            autoClose: 2000,
+            hideProgressBar: true,
+          });
+          return;
+        }
+        break;
+    }
+
+    console.log(data);
     onSubmit(data);
   };
+
   return (
     <CustomForm
-      onSubmit={handleSubmit(onSubmitHandler)}
+      onSubmit={handleSubmit}
       style={{
         alignItems: "center",
       }}
@@ -108,55 +173,192 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
       <TextField
         label="Account Name"
         variant="outlined"
-        {...register("accountName")}
+        name="accountName"
         InputLabelProps={{ style: textStyles }}
         inputProps={{ style: textStyles }}
         InputProps={{ style: focusStyles }}
-        error={!!errors.accountName}
-        helperText={errors.accountName?.message}
       />
       <TextField
         label="Requester Email"
         variant="outlined"
         type="email"
-        {...register("requesterEmail")}
+        name="requesterEmail"
         InputLabelProps={{ style: textStyles }}
         inputProps={{ style: textStyles }}
         InputProps={{ style: focusStyles }}
-        error={!!errors.requesterEmail}
-        helperText={errors.requesterEmail?.message}
-      />
-      <TextField
-        label="Subject"
-        variant="outlined"
-        {...register("subject")}
-        InputLabelProps={{ style: textStyles }}
-        inputProps={{ style: textStyles }}
-        InputProps={{ style: focusStyles }}
-        error={!!errors.subject}
-        helperText={errors.subject?.message}
       />
 
-      <TextareaAutosize
-        placeholder="Detailing"
-        style={{
-          ...textStyles,
-          backgroundColor: "#F72068",
-          color: "white",
-          padding: "8px",
-          fontSize: "16px",
-          width: "25vw",
-          minHeight: "100px",
-          borderColor: errors.detailing ? "red" : "",
-        }}
-        {...register("detailing")}
-      />
+      <FormControl fullWidth>
+        <InputLabel sx={{ color: "white" }} id="demo-simple-select-label">
+          Subject
+        </InputLabel>
+        <Select
+          style={{ ...textStyles }}
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          name="subject"
+          value={module}
+          label="Subject"
+          placeholder="Subject"
+          onChange={handleChange}
+        >
+          <MenuItem value={"Orders"}>Orders</MenuItem>
+          <MenuItem value={"Payments"}>Payments</MenuItem>
+          <MenuItem value={"Catalog"}>Catalog</MenuItem>
+          <MenuItem value={"Others"}>Others</MenuItem>
+        </Select>
+      </FormControl>
 
-      {errors.detailing && (
-        <div style={{ color: "red", marginTop: "8px", fontSize: "14px" }}>
-          {errors.detailing.message}
-        </div>
+      {module === "Orders" && (
+        <>
+          <br />
+          <TextField
+            label="Order number"
+            variant="outlined"
+            name="orderNumber"
+            InputLabelProps={{ style: textStyles }}
+            inputProps={{ style: textStyles }}
+            InputProps={{ style: focusStyles }}
+          />
+          <FormControl
+            sx={{
+              borderRadius: "8px",
+              minWidth: "25vw",
+              alignItems: "center",
+              background: "#F72068",
+            }}
+          >
+            <FormLabel
+              sx={{
+                color: "white",
+                background: "#F72068",
+              }}
+              id="radio-buttons-group-label"
+            >
+              Affecting all users?
+            </FormLabel>
+            <RadioGroup
+              sx={{
+                background: "#F72068",
+              }}
+              aria-labelledby="radio-buttons-group-label"
+              name="affectingAllUsers"
+              value={formData.affectingAllUsers ? "yes" : "no"}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  affectingAllUsers: e.target.value === "yes" ? "yes" : "no",
+                })
+              }
+            >
+              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio />} label="No" />
+            </RadioGroup>
+          </FormControl>
+          <TextareaAutosize
+            placeholder="Detailing"
+            name="detailing"
+            style={{
+              ...textStylesAutosize,
+            }}
+          />
+        </>
       )}
+      {module === "Payments" && (
+        <>
+          <br />
+          <TextField
+            label="Transaction number"
+            variant="outlined"
+            name="transactionNumber"
+            InputLabelProps={{ style: textStyles }}
+            inputProps={{ style: textStyles }}
+            InputProps={{ style: focusStyles }}
+          />
+          <TextField
+            label="Transaction status"
+            variant="outlined"
+            name="transactionStatus"
+            InputLabelProps={{ style: textStyles }}
+            inputProps={{ style: textStyles }}
+            InputProps={{ style: focusStyles }}
+          />
+          <TextField
+            label="Payment Acquirer"
+            name="paymentAcquirer"
+            variant="outlined"
+            InputLabelProps={{ style: textStyles }}
+            inputProps={{ style: textStyles }}
+            InputProps={{ style: focusStyles }}
+          />
+          <TextareaAutosize
+            placeholder="Detailing"
+            name="detailing"
+            style={{
+              ...textStylesAutosize,
+            }}
+          />
+        </>
+      )}
+      {module === "Catalog" && (
+        <>
+          <br />
+          <TextField
+            label="Skuid"
+            name="skuId"
+            variant="outlined"
+            InputLabelProps={{ style: textStyles }}
+            inputProps={{ style: textStyles }}
+            InputProps={{ style: focusStyles }}
+          />
+          <div
+            style={{
+              background: "#F72068",
+              display: "flex",
+              alignItems: "center",
+              flexDirection: "column",
+              justifyContent: "space-evenly",
+              borderRadius: "8px",
+              height: "5vw",
+              width: "25vw",
+            }}
+          >
+            Print of the page
+            <input
+              type="file"
+              name="printOfThePage"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                setFormData({
+                  ...formData,
+                  printOfThePage: file || null,
+                });
+              }}
+            />
+          </div>
+          <TextareaAutosize
+            placeholder="Detailing"
+            name="detailing"
+            style={{
+              ...textStylesAutosize,
+            }}
+          />
+        </>
+      )}
+      {module === "Others" && (
+        <>
+          <br />
+          <TextareaAutosize
+            placeholder="Detailing"
+            name="detailing"
+            style={{
+              ...textStylesAutosize,
+            }}
+          />
+        </>
+      )}
+
       <Button
         variant="contained"
         color="primary"

@@ -63,7 +63,6 @@ const Home: React.FC = () => {
     >
       <h1 style={{ textAlign: "center" }}>Abrir Ticket</h1>
       <Form onSubmit={handleSubmit} />
-
       <ToastContainer />
     </div>
   );
