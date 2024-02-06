@@ -31,12 +31,13 @@ interface FormData {
   subject: string;
   detailing: string;
   orderNumber?: string;
-  affectingAllUsers?: string;
+  affectingAllUsers?: boolean;
   transactionNumber?: string;
   transactionStatus?: string;
   paymentAcquirer?: string;
   skuId?: string;
   printOfThePage?: any;
+  tags: string[];
 }
 interface FormProps {
   onSubmit: (data: FormData) => void;
@@ -50,12 +51,13 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
     subject: "",
     detailing: "",
     orderNumber: "",
-    affectingAllUsers: "",
+    affectingAllUsers: true,
     transactionNumber: "",
     transactionStatus: "",
     paymentAcquirer: "",
     skuId: "",
-    printOfThePage: "",
+    printOfThePage: null,
+    tags: [""],
   });
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -79,9 +81,9 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
       printOfThePage: e.currentTarget.printOfThePage?.files?.length
         ? e.currentTarget.printOfThePage?.files[0]
         : null,
+      tags: [""],
     };
 
-    console.log(data);
     switch (module) {
       case "Orders":
         if (
@@ -97,7 +99,8 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
           });
           return;
         } else {
-          data.subject = `Module: ${data.subject}, order number:${data.orderNumber}`;
+          data.subject = `Module: ${data.subject}, order number:${data.orderNumber}, Affectionf all users: ${data.affectingAllUsers}`;
+          data.tags = ["Orders", `AffectingAllUsers:${data.affectingAllUsers}`];
         }
         break;
       case "Payments":
@@ -117,6 +120,11 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
           return;
         } else {
           data.subject = `Module: ${data.subject}, transaction number:${data.transactionNumber}, transaction status:${data.transactionNumber}, payment acquirer:${data.paymentAcquirer}`;
+          data.tags = [
+            "Payments",
+            `paymentAcquirer:${data.paymentAcquirer}`,
+            `transactionStatus:${data.transactionStatus}`,
+          ];
         }
         break;
       case "Catalog":
@@ -135,6 +143,7 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
           return;
         } else {
           data.subject = `Module: ${data.subject}, skuId:${data.skuId}`;
+          data.tags = ["Catalog"];
         }
         break;
       case "Others":
@@ -144,12 +153,6 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
           !data.requesterEmail ||
           !data.subject
         ) {
-          console.log(
-            !data.detailing ||
-              !data.accountName ||
-              !data.requesterEmail ||
-              !data.subject
-          );
           toast.error("Preencha o campo obrigatório para Others", {
             autoClose: 2000,
             hideProgressBar: true,
@@ -158,8 +161,6 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
         }
         break;
     }
-
-    console.log(data);
     onSubmit(data);
   };
 
@@ -238,16 +239,13 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
               Affecting all users?
             </FormLabel>
             <RadioGroup
-              sx={{
-                background: "#F72068",
-              }}
               aria-labelledby="radio-buttons-group-label"
               name="affectingAllUsers"
               value={formData.affectingAllUsers ? "yes" : "no"}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  affectingAllUsers: e.target.value === "yes" ? "yes" : "no",
+                  affectingAllUsers: e.target.value === "yes",
                 })
               }
             >

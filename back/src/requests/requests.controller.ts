@@ -1,12 +1,18 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { RequestsService } from './requests.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('')
 export class RequestsController {
   constructor(private readonly requestService: RequestsService) {}
   @Post('/createOrganization')
   async CreateOrganization(@Body() organizationName: string) {
-    console.log(organizationName);
     return this.requestService.CreateOrganization(organizationName);
   }
 
@@ -18,5 +24,11 @@ export class RequestsController {
   @Post('/createTicket')
   async CreateTicket(@Body() ticketsInfos: string) {
     return this.requestService.CreateTicket(ticketsInfos);
+  }
+
+  @Post('/createImage')
+  @UseInterceptors(FileInterceptor('file'))
+  async createImage(@UploadedFile() file) {
+    return this.requestService.CreateImage(file);
   }
 }
