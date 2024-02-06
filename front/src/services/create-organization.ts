@@ -1,5 +1,5 @@
 import extractOrganizationName from "@/utils/functions";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 const createOrganization = async (email: string) => {
   try {

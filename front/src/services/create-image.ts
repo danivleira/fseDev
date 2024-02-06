@@ -1,5 +1,4 @@
 import axios from "axios";
-import fs from "fs";
 
 const createImage = async (imageFile: any) => {
   const formData = new FormData();

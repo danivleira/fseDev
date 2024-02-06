@@ -6,7 +6,7 @@ const extractOrganizationName = async (email: string) => {
     return email.substring(atIndex + 1, dotComIndex);
   }
 
-  return null;
+  return;
 };
 
 export default extractOrganizationName;

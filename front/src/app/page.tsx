@@ -17,7 +17,6 @@ const Home: React.FC = () => {
         formData.accountName
       );
       const tokenImage = await createImage(formData.printOfThePage);
-      console.log(tokenImage);
       const ticketResponse = await createTicket(
         formData.requesterEmail,
         formData.subject,
@@ -25,8 +24,6 @@ const Home: React.FC = () => {
         formData.tags,
         tokenImage
       );
-
-      console.log(ticketResponse);
 
       toast.success(
         `Ticket de id ${ticketResponse.ticket.id} criado com sucesso`,
@@ -46,21 +43,25 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: "#030202",
-        color: "white",
-      }}
-    >
-      <h1 style={{ textAlign: "center" }}>Abrir Ticket</h1>
-      <Form onSubmit={handleSubmit} />
-      <ToastContainer />
-    </div>
+    <>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          minWidth: "100vw",
+          background: "#030202",
+          color: "white",
+          overflow: "hidden",
+        }}
+      >
+        <h1 style={{ textAlign: "center" }}>Create a Ticket</h1>
+        <Form onSubmit={handleSubmit} />
+        <ToastContainer />
+      </div>
+    </>
   );
 };
 

@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import { File } from "buffer";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import {
   FormControl,
   FormControlLabel,
@@ -169,6 +168,7 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
       onSubmit={handleSubmit}
       style={{
         alignItems: "center",
+        borderRadius: "8px",
       }}
     >
       <TextField
@@ -194,7 +194,7 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
           Subject
         </InputLabel>
         <Select
-          style={{ ...textStyles }}
+          style={{ ...textStyles, width: "26.5vw" }}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
           name="subject"
@@ -356,15 +356,16 @@ const Form: React.FC<FormProps> = ({ onSubmit }) => {
           />
         </>
       )}
-
-      <Button
-        variant="contained"
-        color="primary"
-        type="submit"
-        style={buttonStyles}
-      >
-        Submit
-      </Button>
+      {module != "" && (
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          style={buttonStyles}
+        >
+          Submit
+        </Button>
+      )}
     </CustomForm>
   );
 };

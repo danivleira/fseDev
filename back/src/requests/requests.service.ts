@@ -48,7 +48,6 @@ export class RequestsService {
         userInfos,
         headers,
       );
-      console.log('uuuuuusssseerrr' + response);
       return response.data;
     } catch (error: unknown) {
       if (
@@ -64,7 +63,6 @@ export class RequestsService {
   }
 
   async CreateTicket(ticketInfos: string) {
-    console.log(ticketInfos);
     try {
       const response = await axios.post(
         'https://vtex7459.zendesk.com/api/v2/tickets',
@@ -113,7 +111,6 @@ export class RequestsService {
         },
       );
       fs.unlinkSync(imagePath);
-      console.log(zendeskResponse.data);
       return zendeskResponse.data.upload.token;
     } catch (error) {
       throw error;
